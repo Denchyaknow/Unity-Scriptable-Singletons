@@ -1,0 +1,28 @@
+name: Update Unity Package
+
+on:
+  push:
+    branches:
+      - main  # Ensure this matches the case of your branch name
+
+jobs:
+  update-release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Read Version from package.json
+      id: package_version
+      run: echo "PACKAGE_VERSION=$(jq -r .version package.json)" >> $GITHUB_ENV
+
+    - name: Define new tag
+      run: echo "NEW_TAG=v${{ env.PACKAGE_VERSION }}" >> $GITHUB_ENV
+
+    - name: Update Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ env.NEW_TAG }}
+        name: Release v${{ env.PACKAGE_VERSION }}
+        body: 'Release of version ${{ env.PACKAGE_VERSION }}'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
